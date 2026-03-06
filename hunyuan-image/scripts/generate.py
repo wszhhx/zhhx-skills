@@ -63,8 +63,8 @@ def submit_job(client, prompt, **kwargs):
     if kwargs.get("seed"):
         req.Seed = kwargs["seed"]
     
-    # 水印设置（默认添加）
-    req.LogoAdd = kwargs.get("logo_add", 1)
+    # 水印设置（默认不添加）
+    req.LogoAdd = kwargs.get("logo_add", 0)
     
     try:
         resp = client.SubmitHunyuanImageJob(req)
@@ -141,7 +141,7 @@ def main():
     parser.add_argument("--clarity", type=str, choices=["x2", "x4"], help="超分选项")
     parser.add_argument("--seed", type=int, help="随机种子")
     parser.add_argument("--no-revise", action="store_true", help="关闭prompt扩写")
-    parser.add_argument("--no-logo", action="store_true", help="不添加水印（API级别）")
+    parser.add_argument("--logo", action="store_true", help="添加水印（API级别，默认不添加）")
     parser.add_argument("--output", type=str, default="./images", help="输出目录")
     
     args = parser.parse_args()
@@ -168,7 +168,7 @@ def main():
         clarity=args.clarity,
         revise=0 if args.no_revise else 1,
         seed=args.seed,
-        logo_add=0 if args.no_logo else 1
+        logo_add=1 if args.logo else 0
     )
     
     if not result:

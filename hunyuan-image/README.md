@@ -117,7 +117,7 @@ Generated images are saved to `{output}/{date}/{job_id}/`:
 2. **Concurrent Limit**: Default 1 concurrent task
 3. **Region**: Only supports `ap-guangzhou`
 4. **Prompt Expansion**: Enabled by default to improve generation quality
-5. **Watermark**: API adds "AI Generated" watermark by default
+5. **Watermark**: Default is no watermark. Use `--logo` to add "AI Generated" watermark
 
 ## Troubleshooting
 

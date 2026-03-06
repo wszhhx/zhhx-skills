@@ -7,7 +7,7 @@ metadata:
     bins: ["python"]
     packages: ["tencentcloud-sdk-python"]
     env: ["TENCENT_SECRET_ID", "TENCENT_SECRET_KEY"]
-    note: "需要腾讯云SecretId和SecretKey，不是OpenAI的API Key"
+    note: "需要腾讯云SecretId和SecretKey，不是OpenAI的API Key。安装后需要运行 pip install tencentcloud-sdk-python"
 ---
 
 # Hunyuan Image - 腾讯混元生图
@@ -95,6 +95,7 @@ python {baseDir}/scripts/generate.py "山水画" --num 4
 | --negative | 反向提示词 | "黑色,模糊" |
 | --clarity | 超分选项 | x2, x4 |
 | --seed | 随机种子 | 12345 |
+| --logo | 添加水印（API级别，默认不添加） | 可选 |
 | --output | 输出目录 | ./images |
 
 ### 风格列表（常用）
@@ -114,59 +115,29 @@ python {baseDir}/scripts/generate.py "山水画" --num 4
 
 完整列表：https://cloud.tencent.com/document/product/1729/105846
 
-### 分辨率选项
-
-- `768:768` - 1:1
-- `768:1024` - 3:4（竖版）
-- `1024:768` - 4:3（横版）
-- `1024:1024` - 1:1
-- `720:1280` - 9:16（手机壁纸）
-- `1280:720` - 16:9（电脑壁纸）
-
 ## 输出
 
 生成的图片保存在 `{output}/{date}/{job_id}/` 目录下：
 - `image_0.png` - 生成的图片
-- `info.json` - 任务信息（包含扩写后的prompt）
+- `info.json` - 任务信息（包含扩写后的描述）
 
 ## 注意事项
 
-1. **并发限制**：默认1个并发，需等待任务完成才能提交下一个
-2. **地域限制**：仅支持 ap-guangzhou
-3. **Prompt扩写**：默认开启，可提升生成效果
-4. **水印**：API默认添加"图片由AI生成"水印，本Skill会自动去除
+1. **异步接口**：API是异步的，需要等待任务完成
+2. **并发限制**：默认1个并发
+3. **地域限制**：仅支持 `ap-guangzhou`
+4. **Prompt扩写**：默认开启，可提升生成效果
+5. **水印**：默认不添加水印。使用 `--logo` 参数可添加"图片由AI生成"水印
 
-## 示例
-
-```bash
-# 生成动漫风格头像
-python scripts/generate.py "可爱女孩, 短发, 微笑, 樱花背景" --style 201 --resolution 768:768
-
-# 生成赛博朋克壁纸
-python scripts/generate.py "未来城市, 霓虹灯, 雨夜, 飞行器" --style 501 --resolution 1920:1080 --clarity x2
-
-# 生成水墨画
-python scripts/generate.py "山水, 瀑布, 松树, 云雾" --style 101 --resolution 1024:768
-```
-
----
-
-## 🚨 踩坑记录与经验总结
+## 踩坑记录
 
 ### 1. 状态码陷阱 ⚠️
 
-**坑**：API返回 `JobStatusCode: 5` 时，不一定是失败！
+**坑**：API返回 `JobStatusCode: 5` 可能是成功！需要检查 `ResultDetails`：
 
-**真相**：
-- 状态码 `4` = 明确成功
-- 状态码 `5` + `ResultDetails: ["Success"]` = 实际成功（图片已生成）
-- 状态码 `5` + 其他信息 = 真正失败
-
-**代码处理**：
 ```python
-if status == '4' or (status == '5' and query_data.get('ResultDetails') == ['Success']):
+if status == '4' or (status == '5' and result.get('ResultDetails') == ['Success']):
     print('✅ 实际生成成功！')
-    # 处理图片...
 ```
 
 ### 2. Prompt内容限制 🚫
@@ -231,6 +202,32 @@ urllib.request.urlopen(req, timeout=30)
 1. **Prompt编写**：简洁描述 + 让AI扩写 > 冗长描述
 2. **错误处理**：检查 `ResultDetails` 而不仅是状态码
 3. **内容规避**：用"古代诗人"代替"李白"，用"美少女"代替具体人名
-4. **水印说明**：API默认添加水印，如需处理请使用图片编辑工具
-5. **网络重试**：生产环境务必添加重试机制
-6. **分辨率**：竖版推荐 `768:1024`，横版推荐 `1024:768`
+4. **网络重试**：生产环境务必添加重试机制
+5. **分辨率**：竖版推荐 `768:1024`，横版推荐 `1024:768`
+
+## 示例
+
+```bash
+# 生成动漫风格头像
+python scripts/generate.py "可爱女孩, 短发, 微笑, 樱花背景" --style 201 --resolution 768:768
+
+# 生成赛博朋克壁纸
+python scripts/generate.py "未来城市, 霓虹灯, 雨夜" --style 501 --resolution 1920:1080 --clarity x2
+
+# 生成水墨画
+python scripts/generate.py "山水, 瀑布, 松树, 云雾" --style 101 --resolution 1024:768
+```
+
+## 相关链接
+
+- [API文档](https://cloud.tencent.com/document/product/1729/105969)
+- [腾讯云控制台](https://console.cloud.tencent.com/cam/capi)
+- [风格列表](https://cloud.tencent.com/document/product/1729/105846)
+
+## 许可证
+
+MIT License
+
+---
+
+[English Version](./README.md)
