@@ -76,6 +76,19 @@ metadata: {"clawdbot":{"emoji":"🔧","requires":{"bins":["python"],"env":["API_
 1. 使用 `skill-creator-2` 设计和构建技能结构
 2. 使用 `clawhub-security-guide` 确保通过 ClawHub 安全审查
 
+## 案例研究
+
+真实案例：将技能从 "Suspicious" 修复为 "Benign"：
+
+### hunyuan-video & hunyuan-3d
+
+修复的问题：
+- YAML metadata → JSON 格式
+- SSL 验证禁用 → 标准 HTTPS
+- 文档与代码不匹配 → 对齐响应解析
+
+详见 SKILL.md 中的详细案例研究。
+
 ## 许可证
 
 MIT

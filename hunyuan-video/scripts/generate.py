@@ -168,13 +168,18 @@ def wait_for_completion(client, job_id, job_type, timeout=600):
         if not result:
             return None
         
-        status = result.get("Status", "")
+        # 不同接口状态字段不同
+        status = result.get("Status") or result.get("JobStatusCode", "")
         
-        # 注意：不同接口状态字段可能不同
-        if status in ["JobSuccess", "SUCCESS", "DONE"]:
+        # 成功状态：文生/图生视频用 "JobSuccess"，风格化用 "4" 或 "5"+ResultDetails
+        if status in ["JobSuccess", "SUCCESS", "DONE", "4"]:
             print("\n✅ 生成完成!")
             return result
-        elif status in ["JobFailed", "FAILED"]:
+        elif status in ["JobFailed", "FAILED", "5"]:
+            # 风格化接口：StatusCode 5 可能是成功，需要检查 ResultDetails
+            if status == "5" and result.get("ResultDetails") == ["Success"]:
+                print("\n✅ 生成完成!")
+                return result
             print(f"\n❌ 生成失败")
             return None
         

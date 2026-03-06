@@ -128,6 +128,31 @@ if ($env:SECRET_KEY) { Write-Host "✅ Credentials configured" }
 - Supports watermark control via API parameter
 ```
 
+### Issue 5: Documentation-Code Mismatch (Critical!)
+
+**Symptom**: Security scan mentions "mismatches between the SKILL.md and the included script"
+
+**Real Example from hunyuan-video/3d fixes**:
+- **Problem**: SKILL.md described response field as `"Status"` with value `"DONE"`, but code checked for `"SUCCESS"`
+- **Result**: Script may not correctly parse real API responses
+
+**Fix**: Ensure SKILL.md accurately describes:
+1. **Response structure** - Field names and nesting
+2. **Status values** - All possible status codes and their meanings
+3. **Error handling** - How errors are returned and parsed
+
+```python
+# ❌ Wrong (SKILL.md says "Status": "DONE" but code checks wrong value)
+status = result.get("Status", "")
+if status == "SUCCESS":  # Mismatch with documentation!
+
+# ✅ Correct (match documentation exactly)
+status = result.get("Status") or result.get("JobStatusCode", "")
+if status in ["DONE", "SUCCESS", "4"]:  # Handle all documented cases
+```
+
+**Best Practice**: Test your skill with real API responses and verify the code parses them exactly as documented in SKILL.md.
+
 ## Complete Example: Benign-Rated Skill
 
 ```yaml
@@ -173,6 +198,81 @@ grep -i "secretkey\|api_key" README.md SKILL.md
 # 4. Verify documentation consistency
 # Ensure SKILL.md, README.md, and package.yaml all match
 ```
+
+## Case Study: Fixing hunyuan-video and hunyuan-3d
+
+Real-world example of fixing skills from "Suspicious" to "Benign".
+
+### Initial Problems
+
+Both skills were marked "Suspicious" with these issues:
+
+| Issue | hunyuan-video | hunyuan-3d |
+|-------|---------------|------------|
+| Metadata format | ❌ YAML multi-line | ❌ YAML multi-line |
+| SSL verification | ❌ Disabled | ❌ Disabled (3 places) |
+| Doc-code mismatch | ❌ Status field mismatch | ❌ Status value mismatch |
+
+### Fixes Applied
+
+#### 1. Metadata Format (Both skills)
+
+```yaml
+# Before ❌
+metadata:
+  requires:
+    bins: ["python"]
+    env: ["TENCENT_SECRET_ID", "TENCENT_SECRET_KEY"]
+
+# After ✅
+metadata: {"clawdbot":{"emoji":"🎬","requires":{"bins":["python"],"packages":["tencentcloud-sdk-python"],"env":["TENCENT_SECRET_ID","TENCENT_SECRET_KEY"]},"primaryEnv":"TENCENT_SECRET_ID"}}
+```
+
+#### 2. SSL Verification (Both skills)
+
+```python
+# Before ❌
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
+
+# After ✅
+import urllib.request
+with urllib.request.urlopen(url, timeout=30) as response:
+    ...
+```
+
+#### 3. Documentation-Code Alignment
+
+**hunyuan-3d**:
+- SKILL.md said: `Status: "DONE"` means success
+- Code checked: `status == "SUCCESS"`
+- **Fix**: Changed code to check `status == "DONE"`
+
+**hunyuan-video**:
+- Different APIs use different status fields
+- **Fix**: Unified handling to check both `Status` and `JobStatusCode`
+
+```python
+# Before ❌ (only checked one field)
+status = result.get("Status", "")
+if status == "SUCCESS":
+
+# After ✅ (handles all documented cases)
+status = result.get("Status") or result.get("JobStatusCode", "")
+if status in ["JobSuccess", "SUCCESS", "DONE", "4"]:
+    # Success
+elif status == "5" and result.get("ResultDetails") == ["Success"]:
+    # Special case for stylization API
+```
+
+### Result
+
+After fixes:
+- ✅ Metadata: JSON format
+- ✅ SSL: Standard HTTPS
+- ✅ Documentation: Matches code behavior
+- **Final Rating**: "Benign" (high confidence)
 
 ## Relationship with skill-creator-2
 

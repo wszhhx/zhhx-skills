@@ -76,6 +76,19 @@ This skill is **complementary** to [skill-creator-2](https://clawhub.ai/yixinli8
 1. Use `skill-creator-2` to design and structure your skill
 2. Use `clawhub-security-guide` to ensure it passes ClawHub security scans
 
+## Case Studies
+
+Real-world examples of fixing skills from "Suspicious" to "Benign":
+
+### hunyuan-video & hunyuan-3d
+
+Fixed issues:
+- YAML metadata → JSON format
+- SSL verification disabled → Standard HTTPS
+- Documentation-code mismatch → Aligned response parsing
+
+See SKILL.md for detailed case study.
+
 ## License
 
 MIT

@@ -112,7 +112,7 @@ def wait_for_completion(api_key, job_id, timeout=600):
         
         status = result.get("Status", "")
         
-        if status == "SUCCESS":
+        if status == "DONE":
             print("\n✅ 3D模型生成完成!")
             return result
         elif status == "FAILED":
