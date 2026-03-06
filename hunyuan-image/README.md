@@ -39,8 +39,12 @@ $env:TENCENT_SECRET_KEY = "your-secret-key"
 ### 3. Verify Installation
 
 ```powershell
-# Check environment variables
-Write-Host "SecretId: $env:TENCENT_SECRET_ID"
+# Check if environment variables are set
+if ($env:TENCENT_SECRET_ID -and $env:TENCENT_SECRET_KEY) {
+    Write-Host "✅ Environment variables configured"
+} else {
+    Write-Host "❌ Please set TENCENT_SECRET_ID and TENCENT_SECRET_KEY"
+}
 
 # Test generation
 python scripts/generate.py "a cute cat"

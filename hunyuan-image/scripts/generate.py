@@ -90,18 +90,12 @@ def query_job(client, job_id):
 def download_image(url, output_path):
     """下载图片"""
     import urllib.request
-    import ssl
-    
-    # 忽略SSL证书验证
-    ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
     
     try:
         req = urllib.request.Request(url, headers={
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.0'
         })
-        with urllib.request.urlopen(req, context=ssl_context, timeout=30) as response:
+        with urllib.request.urlopen(req, timeout=30) as response:
             with open(output_path, 'wb') as f:
                 f.write(response.read())
         return True

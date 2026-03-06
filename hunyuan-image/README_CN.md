@@ -39,8 +39,12 @@ $env:TENCENT_SECRET_KEY = "your-secret-key"
 ### 3. 验证配置
 
 ```powershell
-# 检查环境变量
-Write-Host "SecretId: $env:TENCENT_SECRET_ID"
+# 检查环境变量是否已设置
+if ($env:TENCENT_SECRET_ID -and $env:TENCENT_SECRET_KEY) {
+    Write-Host "✅ 环境变量已配置"
+} else {
+    Write-Host "❌ 请设置 TENCENT_SECRET_ID 和 TENCENT_SECRET_KEY"
+}
 
 # 测试生成
 python scripts/generate.py "一只可爱的小猫"

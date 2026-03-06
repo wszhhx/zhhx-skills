@@ -55,9 +55,12 @@ $env:TENCENT_SECRET_KEY = "your-secret-key"
 ### 3. 验证配置
 
 ```powershell
-# 检查环境变量是否设置正确
-Write-Host "SecretId: $env:TENCENT_SECRET_ID"
-Write-Host "SecretKey: $($env:TENCENT_SECRET_KEY.Substring(0,10))..."
+# 检查环境变量是否已设置
+if ($env:TENCENT_SECRET_ID -and $env:TENCENT_SECRET_KEY) {
+    Write-Host "✅ 环境变量已配置"
+} else {
+    Write-Host "❌ 请设置 TENCENT_SECRET_ID 和 TENCENT_SECRET_KEY"
+}
 
 # 测试生成
 python scripts/generate.py "一只小猫"
@@ -195,15 +198,14 @@ if status == '4' or (status == '5' and query_data.get('ResultDetails') == ['Succ
 
 **解决**：不传 `--style` 参数，让API自动选择默认风格
 
-### 5. 图片下载SSL问题 🔒
+### 5. 图片下载超时问题 ⏱️
 
-**坑**：腾讯云COS图片URL下载时SSL验证失败
+**坑**：下载大图片时可能超时
 
-**解决**：临时禁用SSL验证（仅用于下载图片）
+**解决**：增加超时时间设置
 ```python
-ssl_context = ssl.create_default_context()
-ssl_context.check_hostname = False
-ssl_context.verify_mode = ssl.CERT_NONE
+# 设置合理的超时时间（30秒）
+urllib.request.urlopen(req, timeout=30)
 ```
 
 ### 6. Prompt扩写效果 ✨
@@ -229,6 +231,6 @@ ssl_context.verify_mode = ssl.CERT_NONE
 1. **Prompt编写**：简洁描述 + 让AI扩写 > 冗长描述
 2. **错误处理**：检查 `ResultDetails` 而不仅是状态码
 3. **内容规避**：用"古代诗人"代替"李白"，用"美少女"代替具体人名
-4. **去水印**：默认开启，如需保留使用 `--no-remove-watermark`
+4. **水印说明**：API默认添加水印，如需处理请使用图片编辑工具
 5. **网络重试**：生产环境务必添加重试机制
 6. **分辨率**：竖版推荐 `768:1024`，横版推荐 `1024:768`
