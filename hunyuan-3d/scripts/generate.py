@@ -54,12 +54,7 @@ def submit_3d_job(api_key, params):
     try:
         req = request.Request(SUBMIT_URL, data=payload, headers=headers, method='POST')
         
-        # 忽略SSL证书验证
-        ssl_context = ssl.create_default_context()
-        ssl_context.check_hostname = False
-        ssl_context.verify_mode = ssl.CERT_NONE
-        
-        with request.urlopen(req, context=ssl_context, timeout=30) as response:
+        with request.urlopen(req, timeout=30) as response:
             return json.loads(response.read().decode('utf-8'))
     except Exception as e:
         print(f"提交任务失败: {e}")
@@ -82,11 +77,7 @@ def query_3d_job(api_key, job_id):
     try:
         req = request.Request(QUERY_URL, data=payload, headers=headers, method='POST')
         
-        ssl_context = ssl.create_default_context()
-        ssl_context.check_hostname = False
-        ssl_context.verify_mode = ssl.CERT_NONE
-        
-        with request.urlopen(req, context=ssl_context, timeout=30) as response:
+        with request.urlopen(req, timeout=30) as response:
             return json.loads(response.read().decode('utf-8'))
     except Exception as e:
         print(f"查询任务失败: {e}")
@@ -95,15 +86,11 @@ def query_3d_job(api_key, job_id):
 
 def download_file(url, output_path):
     """下载文件"""
-    ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
-    
     try:
         req = request.Request(url, headers={
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.0'
         })
-        with request.urlopen(req, context=ssl_context, timeout=60) as response:
+        with request.urlopen(req, timeout=60) as response:
             with open(output_path, 'wb') as f:
                 f.write(response.read())
         return True

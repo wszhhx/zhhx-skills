@@ -1,269 +1,261 @@
 ---
-name: hunyuan-video
-description: 腾讯混元生视频API - 支持文生视频、图生视频、视频风格化
-homepage: https://cloud.tencent.com/document/product/1616/107795
-metadata:
-  requires:
-    bins: ["python"]
-    packages: ["tencentcloud-sdk-python"]
-    env: ["TENCENT_SECRET_ID", "TENCENT_SECRET_KEY"]
-    note: "需要腾讯云SecretId和SecretKey，不是OpenAI的API Key"
+name: hunyuan-3d
+description: 腾讯混元生3D API (OpenAI兼容接口) - 基于混元大模型的3D模型生成
+homepage: https://cloud.tencent.com/document/product/1804/126189
+metadata: {"clawdbot":{"emoji":"🎲","requires":{"bins":["python"],"env":["HUNYUAN_3D_API_KEY"]},"primaryEnv":"HUNYUAN_3D_API_KEY"}}
 ---
 
-# Hunyuan Video - 腾讯混元生视频
+# Hunyuan 3D - 腾讯混元生3D (OpenAI兼容接口)
 
-基于腾讯混元大模型的视频生成服务，支持文生视频、图生视频、视频风格化三大核心功能。
+基于腾讯混元大模型的3D模型生成服务，使用OpenAI兼容接口，支持文生3D、图生3D。
 
-## 功能
+## ⚠️ 重要说明
 
-| 功能 | 命令 | 说明 |
-|------|------|------|
-| 🎬 文生视频 | `text2video` | 文本描述生成视频 |
-| 🖼️ 图生视频 | `image2video` | 图片生成视频（支持URL或本地文件） |
-| 🎨 视频风格化 | `stylization` | 视频转2D动漫/3D卡通等风格 |
+**本技能使用OpenAI兼容接口**，与传统的腾讯云API不同：
+- 使用 **API Key** 认证（不是SecretId/SecretKey）
+- 接口风格与OpenAI一致
+- **仅支持专业版**（不支持极速版）
 
-## 前置要求
+## 🚀 快速开始
 
-### 1. 安装Python依赖
+### 第一步：开通混元生3D服务
 
-```bash
-pip install tencentcloud-sdk-python
-```
+**必须**先在腾讯云控制台开通服务：
 
-### 2. 开通混元生视频服务
+1. 访问 [腾讯混元生3D控制台](https://console.cloud.tencent.com/ai3d)
+2. 点击「立即开通」或「申请开通」
+3. 阅读并同意服务协议
+4. 等待服务开通（通常即时生效）
 
-1. 登录 [腾讯混元生视频控制台](https://hunyuan.cloud.tencent.com/#/app/videoModel)
-2. 阅读和同意服务协议
-3. 单击开通服务
+**常见问题**：
+- 如果显示"资源不足"，说明服务正在初始化，请等待5-10分钟后再试
+- 如果无法开通，可能需要实名认证或联系客服
 
-### 3. 配置腾讯云密钥
+### 第二步：获取API Key
+
+1. 访问 [混元生3D API Key管理页面](https://console.cloud.tencent.com/ai3d/api-key)
+2. 点击「创建API Key」
+3. 输入名称（如：hunyuan-3d-key）
+4. 复制生成的API Key（格式：`sk-xxxxx`）
+
+**⚠️ 重要**：API Key只显示一次，请妥善保存！
+
+**备用地址**：如果上述链接无法访问，也可在 [混元大模型API Key页面](https://console.cloud.tencent.com/hunyuan/start) 创建
+
+### 第三步：配置环境变量
+
+**⚠️ 重要区别**：
+- hunyuan-image 和 hunyuan-video 使用 **腾讯云 SecretId/SecretKey**
+- hunyuan-3d 使用 **混元3D专用 API Key**（格式：`sk-xxxxx`）
 
 **需要的环境变量**：
-- `TENCENT_SECRET_ID` - 腾讯云SecretId
-- `TENCENT_SECRET_KEY` - 腾讯云SecretKey
+- `HUNYUAN_3D_API_KEY` - 混元3D API Key
 
+**Windows PowerShell**:
 ```powershell
-# Windows PowerShell - 永久设置
-[Environment]::SetEnvironmentVariable("TENCENT_SECRET_ID", "your-secret-id", "User")
-[Environment]::SetEnvironmentVariable("TENCENT_SECRET_KEY", "your-secret-key", "User")
+# 临时设置（当前会话）
+$env:HUNYUAN_3D_API_KEY = "sk-xxxxx"
 
-# 或临时设置（当前会话）
-$env:TENCENT_SECRET_ID = "your-secret-id"
-$env:TENCENT_SECRET_KEY = "your-secret-key"
+# 永久设置（推荐）
+[Environment]::SetEnvironmentVariable("HUNYUAN_3D_API_KEY", "sk-xxxxx", "User")
 ```
 
-**获取密钥步骤**：
-1. 访问 https://console.cloud.tencent.com/cam/capi
-2. 点击「新建密钥」
-3. 复制 SecretId 和 SecretKey
-4. **⚠️ 注意**：SecretKey 只显示一次，请妥善保存
+**Linux/Mac**:
+```bash
+# 临时设置
+export HUNYUAN_3D_API_KEY="sk-xxxxx"
 
-### 4. 验证配置
+# 永久设置（添加到 ~/.bashrc 或 ~/.zshrc）
+echo 'export HUNYUAN_3D_API_KEY="sk-xxxxx"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### 第四步：验证配置
 
 ```powershell
 # 检查环境变量
-Write-Host "SecretId: $env:TENCENT_SECRET_ID"
-Write-Host "SecretKey: $($env:TENCENT_SECRET_KEY.Substring(0,10))..."
+Write-Host "API Key: $($env:HUNYUAN_3D_API_KEY.Substring(0,15))..."
 
 # 测试生成
-python scripts/generate.py text2video "一只小猫"
+python scripts/generate.py --mode text --prompt "一只小狗"
 ```
+
+**如果报错"资源不足"**：服务正在初始化，等待5-10分钟后重试
+
+```bash
+python scripts/generate.py --mode text --prompt "一只小狗"
+```
+
+如果看到「任务提交成功」，说明配置正确！
+
+## 功能
+
+- **文生3D**：通过文本描述生成3D模型
+- **图生3D**：通过图片生成3D模型
+- **多版本支持**：支持模型版本3.0和3.1
 
 ## 使用方法
 
-### 1. 文生视频
+### 基础用法
 
 ```bash
-python scripts/generate.py text2video "一只可爱的小猪在草地上奔跑"
+# 文生3D
+python scripts/generate.py --mode text --prompt "一只可爱的小猪"
 
-# 指定分辨率
-python scripts/generate.py text2video "小猪" --resolution 1080p
+# 图生3D
+python scripts/generate.py --mode image --image-url "https://example.com/pig.jpg"
+
+# 使用3.1版本模型
+python scripts/generate.py --mode text --prompt "小狗" --model 3.1
 ```
 
-**参数**：
-- `prompt`: 文本描述（必填）
-- `--resolution`: 分辨率（720p, 1080p，默认720p）
+### 参数说明
 
-### 2. 图生视频
+| 参数 | 说明 | 示例 |
+|------|------|------|
+| --mode | 生成模式 | `text`(文生3D), `image`(图生3D) |
+| --prompt | 文本描述（文生3D） | "一只可爱的小猪" |
+| --image-url | 图片URL（图生3D） | "https://example.com/pig.jpg" |
+| --model | 模型版本 | `3.0`(默认), `3.1` |
+| --output | 输出目录 | ./models |
 
-```bash
-# 使用图片URL
-python scripts/generate.py image2video "https://example.com/pig.jpg"
+### 模型版本说明
 
-# 使用本地图片
-python scripts/generate.py image2video "./pig.png"
+| 版本 | 特点 |
+|------|------|
+| 3.0 | 默认版本，功能完整 |
+| 3.1 | 新版本，但LowPoly和Sketch参数不可用 |
 
-# 添加辅助描述
-python scripts/generate.py image2video "./pig.png" --prompt "小猪在奔跑"
-```
+### 输入要求
 
-**参数**：
-- `image`: 图片URL或本地路径（必填）
-- `--prompt`: 辅助描述（可选）
+**文生3D**：
+- 文本描述：最多1024个utf-8字符
+- 支持中文提示词
 
-**支持格式**：
-- URL: `http://` 或 `https://` 开头
-- 本地文件: 相对路径或绝对路径
-
-### 3. 视频风格化
-
-```bash
-# 转为2D动漫风格
-python scripts/generate.py stylization "https://example.com/video.mp4" --style 2d_anime
-
-# 转为3D卡通风格
-python scripts/generate.py stylization "https://example.com/video.mp4" --style 3d_cartoon
-```
-
-**风格选项**：
-- `2d_anime`: 2D动漫
-- `3d_cartoon`: 3D卡通
-- `3d_china`: 3D国潮
-- `pixel_art`: 像素风
-
-**输入视频要求**：
-- 格式：mp4、mov
-- 时长：1～60秒
-- 分辨率：540P~2056P
-- 大小：不超过200M
-- FPS：15～60fps
+**图生3D**：
+- 图片格式：jpg, png, jpeg, webp
+- 图片大小：≤8MB
+- 分辨率：128px ~ 5000px（单边）
 
 ## 输出
 
-生成的视频保存在 `{output}/{date}/{job_id}/` 目录下：
-- `{command}_result.mp4` - 生成的视频
+生成的3D模型保存在 `{output}/{date}/{job_id}/` 目录下：
+- `model.{format}` - 3D模型文件（obj/glb格式）
 - `info.json` - 任务信息
 
-## 经验总结与踩坑记录
+**输出格式**：
+- 同时返回 `.glb` 和 `.obj` 格式
+- 包含纹理贴图
+- 附带预览图
 
-### 1. 状态码陷阱 ⚠️
+## 接口信息
 
-**问题**：不同接口返回的状态字段和成功值不一致！
+- **Base URL**: `https://api.ai3d.cloud.tencent.com`
+- **提交任务**: `POST /v1/ai3d/submit`
+- **查询任务**: `POST /v1/ai3d/query`
+- **认证方式**: API Key (Header: `Authorization: sk-xxxxx`)
 
-| 接口 | 状态字段 | 成功值 |
-|------|----------|--------|
-| 文生视频 | `Status` | `DONE` |
-| 图生视频 | `Status` | `DONE` |
-| 视频风格化 | `JobStatusCode` | `4` 或 `5`+`ResultDetails:Success` |
+## 踩坑记录与解决方案
+
+### 1. 服务未开通 - ResourceUnavailable
+
+**错误现象**：
+```
+ResourceUnavailable.NotExist - 计费状态未知
+```
 
 **解决方案**：
-```python
-# 统一处理多种状态
-success_statuses = ["JobSuccess", "SUCCESS", "DONE"]
-if status in success_statuses:
-    print("✅ 生成完成!")
+1. 访问 https://console.cloud.tencent.com/ai3d
+2. 点击「立即开通」
+3. 等待5-10分钟让服务初始化
+4. 重试
+
+### 2. 资源不足 - ResourceInsufficient
+
+**错误现象**：
 ```
-
-### 2. 图生视频参数类型陷阱 ⚠️
-
-**问题**：`Image` 参数不是字符串，而是对象类型！
-
-**错误代码**：
-```python
-# ❌ 错误
-req.Image = image_url  # 直接赋值字符串
-
-# ✅ 正确
-image = models.Image()
-image.Url = image_url    # 或 image.Base64 = base64_data
-req.Image = image
+ResourceInsufficient - 资源不足
 ```
-
-**经验**：SDK中对象类型的参数需要创建对应的对象实例。
-
-### 3. 本地文件支持 💡
-
-**实现方式**：读取本地文件转为base64编码
-
-```python
-if image_input.startswith('http'):
-    image.Url = image_input
-elif os.path.exists(image_input):
-    with open(image_input, 'rb') as f:
-        image.Base64 = base64.b64encode(f.read()).decode('utf-8')
-```
-
-**好处**：用户可以直接使用本地图片，无需先上传。
-
-### 4. 视频生成时间较长 ⏱️
-
-**观察**：
-- 文生视频：约1-3分钟
-- 图生视频：约1-3分钟
-- 视频风格化：约2-5分钟
-
-**建议**：设置合理的超时时间（默认600秒），并显示进度点让用户知道正在处理。
-
-### 5. 视频风格化状态码特殊处理 ⚠️
-
-**问题**：风格化接口返回 `JobStatusCode: 5` 但实际可能是成功！
-
-**原因**：`StatusCode: 5` + `ResultDetails: ["Success"]` = 实际成功
 
 **解决方案**：
-```python
-if status == "4" or (status == "5" and result.get("ResultDetails") == ["Success"]):
-    print("✅ 实际生成成功！")
+- 服务刚开通时可能出现，等待5-10分钟后重试
+- 如果持续出现，联系腾讯云客服
+
+### 3. API Key错误 - Unauthorized
+
+**错误现象**：
+```
+HTTP 401: Unauthorized
+Incorrect API key provided
 ```
 
-### 6. SSL证书验证 🔒
+**解决方案**：
+1. 确认使用的是 **API Key**（不是SecretId/SecretKey）
+2. API Key格式应为 `sk-xxxxx`
+3. 在 https://console.cloud.tencent.com/hunyuan/start 创建
+4. 检查环境变量是否正确设置
 
-**问题**：下载视频时可能遇到SSL验证错误
+### 4. 响应格式问题
 
-**解决方案**：临时禁用SSL验证（仅用于下载）
-```python
-ssl_context = ssl.create_default_context()
-ssl_context.check_hostname = False
-ssl_context.verify_mode = ssl.CERT_NONE
+**发现**：OpenAI兼容接口返回格式为：
+```json
+{
+  "Response": {
+    "JobId": "xxx",
+    "Status": "DONE",
+    "ResultFile3Ds": [...]
+  }
+}
 ```
 
-### 7. 并发限制 ⚠️
+**注意**：状态字段是 `Status` 不是 `StatusCode`，成功状态是 `DONE` 不是 `SUCCESS`
 
-**限制**：
-- 视频风格化：默认1个并发
-- 其他功能：默认3个并发
+### 5. 模型版本3.1的限制
 
-**建议**：顺序执行，等待前一个任务完成再提交下一个。
+**注意**：选择3.1版本时，LowPoly和Sketch参数不可用
 
-### 8. 任务有效期 ⏰
+### 6. 图片格式不支持
 
-**注意**：任务结果URL有效期为48小时，请及时下载。
+**错误**：图片上传失败
+
+**解决**：只支持jpg, png, jpeg, webp格式
 
 ## 完整示例
 
 ```bash
-# 示例1：文生视频
-python scripts/generate.py text2video "一只可爱的小猪在草地上奔跑，阳光明媚"
+# 示例1：生成小猪3D模型
+python scripts/generate.py --mode text --prompt "一只可爱的小猪，粉色，卡通风格"
 
-# 示例2：图生视频（本地图片）
-python scripts/generate.py image2video "./my_pig.png" --prompt "小猪在奔跑"
+# 示例2：通过图片生成3D
+python scripts/generate.py --mode image --image-url "https://example.com/pig-photo.jpg"
 
-# 示例3：视频风格化
-python scripts/generate.py stylization "https://example.com/video.mp4" --style 2d_anime
+# 示例3：使用3.1版本
+python scripts/generate.py --mode text --prompt "小狗" --model 3.1
+
+# 示例4：指定输出目录
+python scripts/generate.py --mode text --prompt "小猫" --output ./my_models
 ```
 
 ## 注意事项
 
-1. **异步接口**：所有功能都是异步的，需要轮询等待任务完成
-2. **地域限制**：仅支持 `ap-guangzhou`
-3. **网络要求**：输入URL需要可公开访问（图生视频支持本地文件）
-4. **任务有效期**：48小时
-5. **输出格式**：默认生成MP4格式
-
-## 调试技巧
-
-如果遇到问题：
-1. 检查环境变量：`echo $env:TENCENT_SECRET_ID`
-2. 确认服务已开通：访问控制台查看
-3. 查看详细错误：使用 `RequestId` 联系客服
-4. 测试API连接：先用简单prompt测试
+1. **异步接口**：分为提交任务和查询任务两个步骤
+2. **任务有效期**：24小时
+3. **并发限制**：默认3个并发
+4. **仅专业版**：OpenAI兼容接口不支持极速版
+5. **API Key**：使用单独的API Key，不是腾讯云SecretId/SecretKey
+6. **生成时间**：3D生成需要较长时间（1-5分钟），请耐心等待
 
 ## 相关链接
 
-- [API概览](https://cloud.tencent.com/document/product/1616/107795)
-- [混元生视频控制台](https://hunyuan.cloud.tencent.com/#/app/videoModel)
-- [腾讯云密钥管理](https://console.cloud.tencent.com/cam/capi)
+- [OpenAI兼容接口文档](https://cloud.tencent.com/document/product/1804/126189)
+- [API Key管理](https://console.cloud.tencent.com/hunyuan/start)
+- [混元生3D控制台](https://console.cloud.tencent.com/ai3d)
+- [提交任务API文档](https://cloud.tencent.com/document/product/1804/123447)
 
----
+## 调试技巧
 
-**开发经验**：在实现过程中发现SDK参数类型和文档描述可能存在差异，建议通过实际测试验证参数格式。图生视频的`Image`参数是一个典型的对象类型参数陷阱，需要特别注意。
+如果遇到问题，可以：
+1. 检查环境变量：`echo $env:HUNYUAN_3D_API_KEY`
+2. 测试API Key是否有效（见上文curl示例）
+3. 查看腾讯云控制台的服务状态
+4. 使用RequestId联系客服查询

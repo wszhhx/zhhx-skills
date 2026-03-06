@@ -2,11 +2,7 @@
 name: hunyuan-3d
 description: 腾讯混元生3D API (OpenAI兼容接口) - 基于混元大模型的3D模型生成
 homepage: https://cloud.tencent.com/document/product/1804/126189
-metadata:
-  requires:
-    bins: ["python"]
-    env: ["HUNYUAN_3D_API_KEY"]
-    note: "需要混元3D专用的API Key（sk-xxxxx格式），不是腾讯云SecretId/SecretKey"
+metadata: {"clawdbot":{"emoji":"🎲","requires":{"bins":["python"],"env":["HUNYUAN_3D_API_KEY"]},"primaryEnv":"HUNYUAN_3D_API_KEY"}}
 ---
 
 # Hunyuan 3D - 腾讯混元生3D (OpenAI兼容接口)
